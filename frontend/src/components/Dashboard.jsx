@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { LogOut, LayoutDashboard, User, Settings, Bell, Search, TrendingUp, TrendingDown, DollarSign, Users, Ticket, Clock, Utensils, UserPlus, Wrench } from 'lucide-react';
+import { LogOut, LayoutDashboard, User, Settings, Bell, Search, Users } from 'lucide-react';
+
+// Sub-components
+import StatCard from './dashboard/StatCard';
+import RevenueChart from './dashboard/RevenueChart';
+import PopularGames from './dashboard/PopularGames';
+import ActivityFeed from './dashboard/ActivityFeed';
 
 const Dashboard = () => {
     const [user, setUser] = useState(null);
@@ -42,6 +47,8 @@ const Dashboard = () => {
     };
 
     if (loading) return <div className="min-h-screen bg-[#0f172a] flex items-center justify-center"><div className="animate-spin h-10 w-10 border-4 border-blue-500 border-t-transparent rounded-full"></div></div>;
+
+    const displayName = user ? `${user.prenom} ${user.name}` : 'Admin';
 
     return (
         <div className="min-h-screen bg-[#0f172a] text-slate-100 flex">
@@ -86,102 +93,56 @@ const Dashboard = () => {
                     </div>
                     <div className="flex items-center space-x-4">
                         <div className="text-right">
-                            <p className="text-sm font-bold text-white">{user?.name || 'Admin'}</p>
+                            <p className="text-sm font-bold text-white">{displayName}</p>
                             <p className="text-xs text-slate-500 uppercase tracking-wider">{user?.role || 'Manager'}</p>
                         </div>
-                        <div className="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center border-2 border-slate-600"><User className="w-6 h-6 text-slate-400" /></div>
+                        <div className="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center border-2 border-slate-600">
+                            <User className="w-6 h-6 text-slate-400" />
+                        </div>
                     </div>
                 </header>
 
                 <div className="p-8">
-                    <div className="mb-8">
-                        <h2 className="text-3xl font-bold text-white">Dashboard Overview</h2>
-                        <p className="text-slate-400 mt-1">Real-time park operations data.</p>
+                    <div className="mb-8 flex justify-between items-end">
+                        <div>
+                            <h2 className="text-3xl font-bold text-white">Dashboard Overview</h2>
+                            <p className="text-slate-400 mt-1">Real-time park operations data.</p>
+                        </div>
+                        <div className="text-slate-400 text-sm">
+                            Last update: {new Date().toLocaleTimeString()}
+                        </div>
                     </div>
 
                     {/* Stats */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                         {data.stats.map((stat, i) => (
-                            <div key={i} className="bg-[#1e293b] rounded-xl p-6 border border-slate-800 shadow-xl">
-                                <div className="flex justify-between items-start mb-4">
-                                    <div className="p-3 bg-slate-800 rounded-lg">
-                                        {stat.title.includes('Revenue') ? <DollarSign className="w-6 h-6 text-blue-400" /> :
-                                         stat.title.includes('Visitors') ? <Users className="w-6 h-6 text-teal-400" /> :
-                                         stat.title.includes('Tickets') ? <Ticket className="w-6 h-6 text-yellow-400" /> :
-                                         <Clock className="w-6 h-6 text-purple-400" />}
-                                    </div>
-                                    <div className={`flex items-center space-x-1 text-sm font-medium ${stat.trend === 'up' ? 'text-green-400' : 'text-red-400'}`}>
-                                        <span>{stat.change}</span>
-                                        {stat.trend === 'up' ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
-                                    </div>
-                                </div>
-                                <p className="text-slate-400 text-sm font-medium">{stat.title}</p>
-                                <h3 className="text-2xl font-bold text-white mt-1">{stat.value} <span className="text-sm font-normal text-slate-500">{stat.currency}</span></h3>
-                            </div>
+                            <StatCard 
+                                key={i}
+                                title={stat.title}
+                                value={stat.value}
+                                change={stat.change}
+                                trend={stat.trend}
+                                color={stat.color}
+                                currency={stat.currency}
+                            />
                         ))}
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         {/* Chart */}
-                        <div className="lg:col-span-2 bg-[#1e293b] rounded-xl p-6 border border-slate-800 shadow-xl">
-                            <h3 className="text-lg font-bold text-white mb-6">Revenue Trend (Last 7 Days)</h3>
-                            <div className="h-[300px] w-full">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <AreaChart data={data.chartData}>
-                                        <defs>
-                                            <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                                                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                                            </linearGradient>
-                                        </defs>
-                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" />
-                                        <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} dy={10} />
-                                        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
-                                        <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px', color: '#fff' }} />
-                                        <Area type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" />
-                                    </AreaChart>
-                                </ResponsiveContainer>
-                            </div>
+                        <div className="lg:col-span-2">
+                            <RevenueChart data={data.chartData} />
                         </div>
 
                         {/* Popular */}
-                        <div className="bg-[#1e293b] rounded-xl p-6 border border-slate-800 shadow-xl">
-                            <h3 className="text-lg font-bold text-white mb-6">Popular Attractions</h3>
-                            <div className="space-y-6">
-                                {data.popularGames.map((game, i) => (
-                                    <div key={i}>
-                                        <div className="flex justify-between items-center mb-2 text-sm">
-                                            <span className="text-slate-300">{game.name}</span>
-                                            <span className="font-bold text-white">{game.load}%</span>
-                                        </div>
-                                        <div className="w-full bg-slate-800 rounded-full h-2">
-                                            <div className="h-2 rounded-full transition-all duration-500" style={{ width: `${game.load}%`, backgroundColor: game.color }}></div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                        <div>
+                            <PopularGames games={data.popularGames} />
                         </div>
                     </div>
 
                     {/* Activity */}
-                    <div className="mt-8 bg-[#1e293b] rounded-xl p-6 border border-slate-800 shadow-xl">
-                        <h3 className="text-lg font-bold text-white mb-6">Recent Operations</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {data.recentActivity.map((act, i) => (
-                                <div key={i} className="flex space-x-4 p-4 rounded-xl bg-[#0f172a]/50 border border-slate-800">
-                                    <div className="p-2 rounded-lg bg-blue-500/10 h-fit">
-                                        {act.type.includes('Ticket') ? <Ticket className="w-5 h-5 text-blue-400" /> : <DollarSign className="w-5 h-5 text-green-400" />}
-                                    </div>
-                                    <div>
-                                        <div className="flex justify-between items-start w-full">
-                                            <h4 className="text-sm font-bold text-white">{act.title}</h4>
-                                        </div>
-                                        <p className="text-xs text-slate-400 mt-1">{act.description}</p>
-                                        <p className="text-[10px] text-slate-500 mt-2">{act.time} • By {act.user}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                    <div className="mt-8">
+                        <ActivityFeed activities={data.recentActivity} />
                     </div>
                 </div>
             </main>
