@@ -28,6 +28,12 @@ const NAV_ITEMS = [
     { id: 'staff', label: 'Staff', icon: ShieldCheck },
 ];
 
+const ROLE_NAV_ACCESS = {
+    admin: ['overview', 'visitors', 'attractions', 'tickets', 'billets', 'users', 'staff'],
+    staff: ['overview', 'visitors', 'billets', 'attractions'],
+    client: ['overview'],
+};
+
 const RESOURCE_CONFIG = {
     visitors: {
         title: 'Visitors',
@@ -324,7 +330,30 @@ const Dashboard = () => {
     };
 
     const displayName = user ? `${user.prenom} ${user.name}` : 'Admin';
+    // We only trust roles that are explicitly configured in the access map.
+    // This prevents real roles like "client" from being accidentally grouped with another role.
+    const currentRole = ROLE_NAV_ACCESS[user?.role] ? user.role : 'client';
+    // This derives the allowed navigation from the authenticated user's role.
+    // Derived state keeps the permission logic in one place and avoids repeating role checks everywhere.
+    const allowedNavIds = ROLE_NAV_ACCESS[currentRole] || ROLE_NAV_ACCESS.client;
+    // We filter the shared navigation config instead of creating two separate dashboards.
+    // That keeps the structure reusable while still giving each role a tailored view.
+    const visibleNavItems = useMemo(
+        () => NAV_ITEMS.filter((item) => allowedNavIds.includes(item.id)),
+        [allowedNavIds]
+    );
+    // This picks a safe first tab for the current role if the current tab becomes invalid.
+    // It protects us when roles change or when someone refreshes on a tab they should not access.
+    const defaultView = allowedNavIds[0] || 'overview';
     const activeConfig = useMemo(() => RESOURCE_CONFIG[activeView], [activeView]);
+
+    useEffect(() => {
+        // If a role does not have access to the current tab, we immediately move them
+        // to the first allowed tab so the UI never renders an unauthorized section.
+        if (!allowedNavIds.includes(activeView)) {
+            setActiveView(defaultView);
+        }
+    }, [activeView, allowedNavIds, defaultView]);
 
     if (loading) {
         return (
@@ -348,7 +377,7 @@ const Dashboard = () => {
                     </div>
 
                     <nav className="space-y-1">
-                        {NAV_ITEMS.map((item) => {
+                        {visibleNavItems.map((item) => {
                             const Icon = item.icon;
                             const isActive = activeView === item.id;
 
@@ -406,7 +435,7 @@ const Dashboard = () => {
                     </div>
 
                     <div className="mt-4 flex gap-3 overflow-x-auto pb-1 lg:hidden">
-                        {NAV_ITEMS.map((item) => {
+                        {visibleNavItems.map((item) => {
                             const Icon = item.icon;
                             const isActive = activeView === item.id;
 
