@@ -2,6 +2,8 @@ import { useState } from 'react';
 import api from '../api';
 import { useNavigate, Link } from 'react-router-dom';
 
+const MAX_FIELD_LENGTH = 20;
+
 function Register() {
     const [name, setName] = useState('');
     const [prenom, setPrenom] = useState('');
@@ -46,6 +48,7 @@ function Register() {
                                 className="form-control"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
+                                maxLength={MAX_FIELD_LENGTH}
                                 required
                             />
                         </div>
@@ -56,6 +59,7 @@ function Register() {
                                 className="form-control"
                                 value={prenom}
                                 onChange={(e) => setPrenom(e.target.value)}
+                                maxLength={MAX_FIELD_LENGTH}
                                 required
                             />
                         </div>
@@ -66,6 +70,7 @@ function Register() {
                                 className="form-control"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
+                                maxLength={MAX_FIELD_LENGTH}
                                 required
                             />
                         </div>
@@ -76,6 +81,7 @@ function Register() {
                                 className="form-control"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
+                                maxLength={MAX_FIELD_LENGTH}
                                 required
                             />
                         </div>
@@ -86,6 +92,7 @@ function Register() {
                                 className="form-control"
                                 value={passwordConfirmation}
                                 onChange={(e) => setPasswordConfirmation(e.target.value)}
+                                maxLength={MAX_FIELD_LENGTH}
                                 required
                             />
                         </div>

@@ -18,6 +18,8 @@ import PopularGames from './dashboard/PopularGames';
 import ActivityFeed from './dashboard/ActivityFeed';
 import ResourceManager from './dashboard/ResourceManager';
 
+const MAX_FIELD_LENGTH = 20;
+
 const NAV_ITEMS = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
     { id: 'visitors', label: 'Visitors', icon: Users },
@@ -419,6 +421,7 @@ const Dashboard = () => {
                             type="text"
                             value=""
                             readOnly
+                            maxLength={MAX_FIELD_LENGTH}
                             placeholder="Search..."
                             className="w-full border-none bg-transparent text-sm text-white focus:outline-none"
                         />

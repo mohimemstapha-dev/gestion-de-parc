@@ -3,6 +3,8 @@ import axios from 'axios';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { LogOut, LayoutDashboard, User, Settings, Bell, Search, TrendingUp, TrendingDown, DollarSign, Users, Ticket, Clock } from 'lucide-react';
 
+const MAX_FIELD_LENGTH = 20;
+
 const Dashboard = () => {
     const [data, setData] = useState({ stats: [], chartData: [], popularGames: [], recentActivity: [] });
     const [loading, setLoading] = useState(true);
@@ -56,7 +58,7 @@ const Dashboard = () => {
                 <header className="h-20 bg-[#0f172a]/80 backdrop-blur-md sticky top-0 z-10 px-8 flex items-center justify-between border-b border-slate-800">
                     <div className="flex items-center bg-[#1e293b] px-4 py-2 rounded-xl w-96 border border-slate-700/50 shadow-inner">
                         <Search className="w-4 h-4 text-slate-500 mr-2" />
-                        <input type="text" placeholder="Search..." className="bg-transparent border-none focus:outline-none text-sm w-full text-white placeholder-slate-500" />
+                        <input type="text" maxLength={MAX_FIELD_LENGTH} placeholder="Search..." className="bg-transparent border-none focus:outline-none text-sm w-full text-white placeholder-slate-500" />
                     </div>
                     <div className="flex items-center space-x-6">
                         <Bell className="w-5 h-5 text-slate-400 cursor-pointer" />

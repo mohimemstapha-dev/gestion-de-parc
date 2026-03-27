@@ -2,6 +2,8 @@ import { useState } from 'react';
 import api from '../api';
 import { useNavigate, Link } from 'react-router-dom';
 
+const MAX_FIELD_LENGTH = 20;
+
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -30,11 +32,11 @@ function Login() {
           <form onSubmit={handleLogin}>
             <div className='mb-3'>
               <label className='form-label fw-semibold'>Email</label>
-              <input type='email' className='form-control form-control-lg' placeholder='Enter your email' value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <input type='email' className='form-control form-control-lg' placeholder='Enter your email' value={email} onChange={(e) => setEmail(e.target.value)} maxLength={MAX_FIELD_LENGTH} required />
             </div>
             <div className='mb-4'>
               <label className='form-label fw-semibold'>Password</label>
-              <input type='password' className='form-control form-control-lg' placeholder='Enter your password' value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <input type='password' className='form-control form-control-lg' placeholder='Enter your password' value={password} onChange={(e) => setPassword(e.target.value)} maxLength={MAX_FIELD_LENGTH} required />
             </div>
             <div className='d-grid mb-3'>
               <button type='submit' className='btn btn-primary btn-lg'>Se connecter</button>

@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import api from '../../api';
 import { Pencil, Plus, RefreshCw, Save, Search, Trash2, X } from 'lucide-react';
 
+const MAX_FIELD_LENGTH = 20;
+
 const getInitialFormData = (fields) =>
     fields.reduce((accumulator, field) => {
         accumulator[field.name] = field.defaultValue ?? '';
@@ -120,6 +122,15 @@ const ResourceManager = ({
         }));
     };
 
+    const handleFieldChange = (field, value) => {
+        const nextValue = field.type === 'number' ? String(value).slice(0, MAX_FIELD_LENGTH) : value;
+        handleChange(field.name, nextValue);
+    };
+
+    const handleNumberInput = (event) => {
+        event.target.value = event.target.value.slice(0, MAX_FIELD_LENGTH);
+    };
+
     const startEditing = (item) => {
         const defaults = typeof formDefaults === 'function' ? formDefaults(item) : {};
         const nextFormData = fields.reduce((accumulator, field) => {
@@ -228,6 +239,7 @@ const ResourceManager = ({
                                     type="text"
                                     value={searchTerm}
                                     onChange={(event) => setSearchTerm(event.target.value)}
+                                    maxLength={MAX_FIELD_LENGTH}
                                     placeholder={`Search ${title.toLowerCase()}...`}
                                     className="w-full bg-transparent text-sm text-white outline-none placeholder:text-slate-500"
                                 />
@@ -353,7 +365,7 @@ const ResourceManager = ({
                             typeof field.options === 'function' ? field.options(relatedData) : field.options || [];
 
                         if (field.type === 'hidden') {
-                            return <input key={field.name} type="hidden" value={value} readOnly />;
+                            return <input key={field.name} type="hidden" value={value} maxLength={MAX_FIELD_LENGTH} readOnly />;
                         }
 
                         return (
@@ -402,9 +414,10 @@ const ResourceManager = ({
                                 ) : field.type === 'textarea' ? (
                                     <textarea
                                         value={value}
-                                        onChange={(event) => handleChange(field.name, event.target.value)}
+                                        onChange={(event) => handleFieldChange(field, event.target.value)}
                                         required={isRequired}
                                         rows={4}
+                                        maxLength={MAX_FIELD_LENGTH}
                                         placeholder={field.placeholder}
                                         className="w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-sky-500"
                                     />
@@ -412,10 +425,12 @@ const ResourceManager = ({
                                     <input
                                         type={field.type}
                                         value={value}
-                                        onChange={(event) => handleChange(field.name, event.target.value)}
+                                        onChange={(event) => handleFieldChange(field, event.target.value)}
+                                        onInput={field.type === 'number' ? handleNumberInput : undefined}
                                         required={isRequired}
                                         min={field.min}
                                         step={field.step}
+                                        maxLength={MAX_FIELD_LENGTH}
                                         placeholder={field.placeholder}
                                         className="w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-sky-500"
                                     />
